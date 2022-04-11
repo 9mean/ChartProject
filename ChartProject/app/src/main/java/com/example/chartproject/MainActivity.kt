@@ -4,17 +4,12 @@ import android.graphics.Color
 import android.graphics.Paint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.core.content.ContextCompat
 import com.example.chartproject.databinding.ActivityMainBinding
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.charts.CandleStickChart
-import com.github.mikephil.charting.components.AxisBase
+import com.example.chartproject.datas.Candle
+import com.example.chartproject.utils.getMilliFromDate
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.*
-import com.github.mikephil.charting.formatter.ValueFormatter
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
-import com.github.mikephil.charting.interfaces.datasets.ICandleDataSet
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding:ActivityMainBinding
@@ -23,9 +18,10 @@ class MainActivity : AppCompatActivity() {
         binding=ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initChart()
-        val dumy=Candle(0.1f,0.2f,0.4f,0.8f,0.1f)
-        val dumy2=Candle(1.2f,0.4f,0.2f,1.2f,0.1f)
-        val dumy3=Candle(2.3f,0.2f,0.3f,0.5f,0.1f)
+        val dumy= Candle(0,0.2f,0.4f,0.8f,0.1f)
+        val dumy2= Candle(1,0.4f,0.2f,1.2f,0.1f)
+        val dumy3= Candle(2,0.2f,0.3f,0.5f,0.1f)
+
         val dumyList=ArrayList<Candle>()
         dumyList.add(dumy)
         dumyList.add(dumy2)
@@ -72,9 +68,9 @@ class MainActivity : AppCompatActivity() {
             // 캔들 차트 entry 생성
             priceEntries.add(
                 CandleEntry(
-                    candle.createdAt,
-                    candle.shadowHigh,
-                    candle.shadowLow,
+                    candle.date.toFloat(),
+                    candle.high,
+                    candle.low,
                     candle.open,
                     candle.close
                 )
