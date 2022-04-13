@@ -1,32 +1,71 @@
-package com.example.chartproject
+package com.example.chartproject.view
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Paint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.view.View
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.chartproject.databinding.ActivityMainBinding
 import com.example.chartproject.datas.Candle
+import com.example.chartproject.retrofits.RetrofitChartDataService
+import com.example.chartproject.retrofits.RetrofitClient
+import com.example.chartproject.retrofits.ServerAccess
+import com.example.chartproject.utils.getBefor3MDate
+import com.example.chartproject.utils.getCurrentDate
 import com.example.chartproject.utils.getMilliFromDate
+import com.example.chartproject.vm.MainVm
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.Dispatcher
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding:ActivityMainBinding
+    private val mainVm: MainVm by lazy {
+        ViewModelProvider(this,MainVm.Factory(application)).get(MainVm::class.java)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding=ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initChart()
-        val dumy= Candle(0,0.2f,0.4f,0.8f,0.1f)
-        val dumy2= Candle(1,0.4f,0.2f,1.2f,0.1f)
-        val dumy3= Candle(2,0.2f,0.3f,0.5f,0.1f)
+        loadChart()
 
-        val dumyList=ArrayList<Candle>()
-        dumyList.add(dumy)
-        dumyList.add(dumy2)
-        dumyList.add(dumy3)
-        setChartData(dumyList)
+    }
+    private fun loadAfterSetView(){
+        binding.mainTopDivider.visibility= View.VISIBLE
+        binding.mainPredictBtn.visibility=View.VISIBLE
+        binding.mainSettingBtn.visibility=View.VISIBLE
+        binding.mainPredictBtn.setOnClickListener {
+            val intent = Intent(this, PredictActivity::class.java)
+            startActivity(intent)
+        }
+    }
+    private fun loadChart(){
+        
+        lifecycleScope.launch(Dispatchers.IO) {
+            //뷰모델에서 서버로부터 차트요청하고
+
+            mainVm.getChartData("US2YT", getBefor3MDate(), getCurrentDate())
+            //데이터를 다 받았으면 옵저빙해서 뷰에 뿌려주기
+            withContext(Main){
+                mainVm.cartDataList.observe(this@MainActivity,{
+                    setChartData(it)
+                    loadAfterSetView()
+                })
+
+            }
+        }
     }
     fun initChart() {
         binding.apply {
@@ -64,17 +103,20 @@ class MainActivity : AppCompatActivity() {
     }
     fun setChartData(candles: ArrayList<Candle>) {
         val priceEntries = ArrayList<CandleEntry>()
+        var i=0
         for (candle in candles) {
             // 캔들 차트 entry 생성
             priceEntries.add(
                 CandleEntry(
-                    candle.date.toFloat(),
+                    i.toFloat(),
                     candle.high,
                     candle.low,
                     candle.open,
                     candle.close
                 )
             )
+            i+=1
+            //Log.d("TAG", "setChartData: $i 번쨰 캔들")
         }
 
         val priceDataSet = CandleDataSet(priceEntries, "").apply {

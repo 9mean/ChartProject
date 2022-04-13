@@ -22,7 +22,7 @@ object RetrofitClient {
     //레트로핏클라이언트선언
     private var retrofitClient: Retrofit?=null
     //레트로핏클라이언트 가져오기
-    fun getClient(baseUrl:String): Retrofit?{
+    fun getClient(baseUrl:String): Retrofit? {
         Log.d("TAG", "getClient: called")
 
         //okhttp인스턴스생성
@@ -65,7 +65,7 @@ object RetrofitClient {
 //                        .build()
                 //return chain.proceed(finalRequest)
                 val response=chain.proceed(originalRequest)
-                if(response.code()!=200){
+                if(response.code !=200){
                     Handler(Looper.getMainLooper()).post{
                     }
                 }
