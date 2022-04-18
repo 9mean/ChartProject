@@ -77,10 +77,10 @@ object RetrofitClient {
         //위에서 설정한 기본파라미터 인터셉터를 okhttp클라이언트에 추가한다
         client.addInterceptor(baseParameterInterceptor)
         //커넥션 타임아웃
-        client.connectTimeout(10, TimeUnit.SECONDS)
-        client.readTimeout(10, TimeUnit.SECONDS)
-        client.writeTimeout(10, TimeUnit.SECONDS)
-        client.retryOnConnectionFailure(true)
+        client.connectTimeout(100, TimeUnit.SECONDS)
+        client.readTimeout(100, TimeUnit.SECONDS)
+        client.writeTimeout(100, TimeUnit.SECONDS)
+        client.retryOnConnectionFailure(false)
 
         if(retrofitClient==null){
             //레트로핏 빌더(생성패턴)를통해 인스턴스생성

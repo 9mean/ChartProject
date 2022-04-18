@@ -25,7 +25,7 @@ class MainVm(application: Application): AndroidViewModel(application){
 
     }
 
-    //서버에서 다이어리 갖고오기
+    //서버에서 채권 갖고오기
     suspend fun getChartData(symbol:String,st_date:String,end_date:String){
         viewModelScope.launch {
             val response=repo.getChartData(symbol,st_date,end_date)
