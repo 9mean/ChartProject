@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,6 +8,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main_top_layout"
         android:layout_width="match_parent"
         android:layout_height="120dp">
 
@@ -35,19 +36,33 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
     <View
+        android:layout_below="@+id/main_top_layout"
         android:visibility="invisible"
         android:id="@+id/main_top_divider"
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:background="@color/black" />
+    <com.github.ybq.android.spinkit.SpinKitView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/main_spin_kit"
+        android:layout_centerInParent="true"
+        style="@style/SpinKitView.Wave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:SpinKit_Color="@color/white" />
     <com.github.mikephil.charting.charts.CandleStickChart
-        android:id="@+id/priceChart"
+        android:layout_below="@+id/main_top_divider"
+        android:id="@+id/main_chart_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="2">
 
 
     </com.github.mikephil.charting.charts.CandleStickChart>
-</LinearLayout>
+
+</RelativeLayout>

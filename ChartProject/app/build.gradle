@@ -60,5 +60,6 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.2.1"//리사이클러뷰
     //Lifecycle ktx
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
-
+    //로딩창 라이브러리
+    implementation 'com.github.ybq:Android-SpinKit:1.4.0'
 }
