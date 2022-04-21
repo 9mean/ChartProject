@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding:ActivityMainBinding
     lateinit var curDate:String
     lateinit var preDate:String
+    var loadFlag:Boolean=false
     var saveChartList=ArrayList<CandleEntry>()
     private val mainVm: MainVm by lazy {
         ViewModelProvider(this,MainVm.Factory(application)).get(MainVm::class.java)
@@ -43,8 +44,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding=ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        curDate= getCurrentDate()
+        preDate= getBefor3MDate(curDate)
         initChart()
         loadChart()
+        mainVm.cartDataList.observe(this@MainActivity,{
+            Log.d("TAG", "loadChart: cartDataList $it")
+            loadFlag=true
+            setChartData(it)
+            loadAfterSetView()
+        })
+
     }
     private fun loadAfterSetView(){
         binding.mainTopDivider.visibility= View.VISIBLE
@@ -60,15 +70,10 @@ class MainActivity : AppCompatActivity() {
         
         lifecycleScope.launch(Dispatchers.IO) {
             //뷰모델에서 서버로부터 차트요청하고
-            curDate= getCurrentDate()
-            preDate= getBefor3MDate()
+
             mainVm.getChartData("US2YT", preDate, curDate)
             //데이터를 다 받았으면 옵저빙해서 뷰에 뿌려주기
             withContext(Main){
-                mainVm.cartDataList.observe(this@MainActivity,{
-                    setChartData(it)
-                    loadAfterSetView()
-                })
 
             }
         }
@@ -110,10 +115,13 @@ class MainActivity : AppCompatActivity() {
                     //Toast.makeText(this@MainActivity,"왼쪽으로",Toast.LENGTH_SHORT).show()
                 }
                 override fun onSwipeRight() {
-                    Toast.makeText(this@MainActivity,"왼쪽으로",Toast.LENGTH_SHORT).show()
-                    lifecycleScope.launch {
-                        mainVm.getChartData("US2YT", preDate, curDate)
-                        mainSpinKit.visibility=View.VISIBLE
+                    if(loadFlag){
+                        Toast.makeText(this@MainActivity,"왼쪽으로",Toast.LENGTH_SHORT).show()
+                        lifecycleScope.launch {
+                            loadFlag=false
+                            mainVm.getChartData("US2YT", preDate, curDate)
+                            mainSpinKit.visibility=View.VISIBLE
+                        }
                     }
                 }
                 override fun onSwipeTop() {
@@ -143,10 +151,13 @@ class MainActivity : AppCompatActivity() {
             i+=1
             //Log.d("TAG", "setChartData: $i 번쨰 캔들")
         }
+        curDate=candles[0].date
+        preDate= getBefor3MDate(curDate)
+        Log.d("TAG", "setChartData after curDate: $curDate ")
 
         priceEntries= (priceEntries+saveChartList) as ArrayList<CandleEntry>
         saveChartList=priceEntries
-        Log.d("TAG", "setChartData: ${priceEntries.size}")
+        Log.d("TAG", "setChartData: $priceEntries")
         val priceDataSet = CandleDataSet(priceEntries, "").apply {
             axisDependency = YAxis.AxisDependency.LEFT
             // 심지 부분 설정

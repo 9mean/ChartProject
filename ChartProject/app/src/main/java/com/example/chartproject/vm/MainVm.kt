@@ -30,7 +30,7 @@ class MainVm(application: Application): AndroidViewModel(application){
         viewModelScope.launch {
             val response=repo.getChartData(symbol,st_date,end_date)
             chartDataSaveList= response as ArrayList<Candle>
-            chartDataSaveList.sortWith(compareBy { getMilliFromDate(it.date) })
+            //chartDataSaveList.sortWith(compareBy { getMilliFromDate(it.date) })
             //Log.d("TAG", "chartDataSaveList: ${chartDataSaveList}")
             _chartDataList.postValue(chartDataSaveList)
 

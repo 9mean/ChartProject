@@ -20,16 +20,22 @@ fun getMilliFromDate(dateFormat: String?): Long {
     return date.time
 }
 fun getCurrentDate(): String {
+
     val cal = Calendar.getInstance()
-    Log.d("TAG", "getCurrentDate: ${"${cal.get(Calendar.YEAR)}" + "-${cal.get(Calendar.MONTH)+1}" + "-${cal.get(Calendar.DATE)}"}")
-    return "${cal.get(Calendar.YEAR)}" + "-${cal.get(Calendar.MONTH)+1}" + "-${cal.get(Calendar.DATE)}"
+    Log.d("TAG", "getCurrentDate: ${"${cal.get(Calendar.YEAR)}" + "-${cal.get(Calendar.MONTH)-1}" + "-${cal.get(Calendar.DATE)}"}")
+    return "${cal.get(Calendar.YEAR)}" + "-${cal.get(Calendar.MONTH)-1}" + "-${cal.get(Calendar.DATE)}"
 }
-fun getBefor3MDate():String{
+fun getBefor3MDate(curDate:String):String{
+    var dateFormat =SimpleDateFormat("yyyy-MM-dd")
+    var date2 = dateFormat.parse(curDate)
+
     val cal = Calendar.getInstance()
+    cal.time=date2
+    Log.d("TAG", "date2 : ${cal.time} ")
     val format = "yyyy-MM-dd"
     val sdf = SimpleDateFormat(format)
     Log.d("TAG", "getBefor3MDate 1 : ${cal.get(Calendar.MONTH)}")
-    cal.add(cal.get(Calendar.MONTH),-12) //세달 전 ( Calendar.MONTH -1당 7일로 계산됨)
+    cal.add(cal.get(Calendar.MONTH),-1) //세달 전 ( Calendar.MONTH -1당 7일로 계산됨)
     val date = sdf.format(cal.time)
     Log.d("TAG", "getBefor3MDate 2 : $date")
     return date
