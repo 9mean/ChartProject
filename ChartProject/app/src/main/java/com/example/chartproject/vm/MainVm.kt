@@ -16,6 +16,7 @@ class MainVm(application: Application): AndroidViewModel(application){
     }
     private val repo= MainRepo(application)
  //   var chartDataList=ArrayList<Candle>()
+    var count=0
     var chartDataSaveList=ArrayList<Candle>()
     private var _chartDataList= MutableLiveData<ArrayList<Candle>>()
     val cartDataList: LiveData<ArrayList<Candle>>
@@ -28,6 +29,8 @@ class MainVm(application: Application): AndroidViewModel(application){
     //서버에서 채권 갖고오기
     suspend fun getChartData(symbol:String,st_date:String,end_date:String){
         viewModelScope.launch {
+            count+=1
+            Log.d("TAG", "from viewmodel getChartData count : $count ")
             val response=repo.getChartData(symbol,st_date,end_date)
             chartDataSaveList= response as ArrayList<Candle>
             //chartDataSaveList.sortWith(compareBy { getMilliFromDate(it.date) })

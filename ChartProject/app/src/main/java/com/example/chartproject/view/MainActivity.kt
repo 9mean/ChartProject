@@ -15,14 +15,12 @@ import com.example.chartproject.datas.Candle
 import com.example.chartproject.retrofits.RetrofitChartDataService
 import com.example.chartproject.retrofits.RetrofitClient
 import com.example.chartproject.retrofits.ServerAccess
-import com.example.chartproject.utils.OnSwipeTouchListener
-import com.example.chartproject.utils.getBefor3MDate
-import com.example.chartproject.utils.getCurrentDate
-import com.example.chartproject.utils.getMilliFromDate
+import com.example.chartproject.utils.*
 import com.example.chartproject.vm.MainVm
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
@@ -35,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding:ActivityMainBinding
     lateinit var curDate:String
     lateinit var preDate:String
+    var count=0
     var loadFlag:Boolean=false
     var saveChartList=ArrayList<CandleEntry>()
     private val mainVm: MainVm by lazy {
@@ -48,15 +47,21 @@ class MainActivity : AppCompatActivity() {
         preDate= getBefor3MDate(curDate)
         initChart()
         loadChart()
+
         mainVm.cartDataList.observe(this@MainActivity,{
             Log.d("TAG", "loadChart: cartDataList $it")
-            loadFlag=true
-            setChartData(it)
-            loadAfterSetView()
+            lifecycleScope.launch {
+                //delay(1500)
+                loadFlag=true
+                setChartData(it)
+                loadAfterSetView()
+            }
+
         })
 
     }
     private fun loadAfterSetView(){
+    Log.d("TAG", "loadAfterSetView: ")
         binding.mainTopDivider.visibility= View.VISIBLE
         binding.mainPredictBtn.visibility=View.VISIBLE
         binding.mainSettingBtn.visibility=View.VISIBLE
@@ -70,7 +75,6 @@ class MainActivity : AppCompatActivity() {
         
         lifecycleScope.launch(Dispatchers.IO) {
             //뷰모델에서 서버로부터 차트요청하고
-
             mainVm.getChartData("US2YT", preDate, curDate)
             //데이터를 다 받았으면 옵저빙해서 뷰에 뿌려주기
             withContext(Main){
@@ -81,15 +85,18 @@ class MainActivity : AppCompatActivity() {
     fun initChart() {
         binding.apply {
             mainChartView.description.isEnabled = false
-            mainChartView.setMaxVisibleValueCount(200)
-            mainChartView.setPinchZoom(false)
+            mainChartView.setVisibleXRangeMaximum(10f)
+           /* mainChartView.xAxis.setLabelCount(7, /*force: */true)
+            mainChartView.xAxis.axisMinimum = 0F
+            mainChartView.xAxis.axisMaximum = 100F*/
+            mainChartView.setPinchZoom(true)
             mainChartView.setDrawGridBackground(false)
             // x축 설정
             mainChartView.xAxis.apply {
                 textColor = Color.TRANSPARENT
                 position = XAxis.XAxisPosition.BOTTOM
                 // 세로선 표시 여부 설정
-                this.setDrawGridLines(true)
+                this.setDrawGridLines(false)
                 axisLineColor = Color.rgb(50, 59, 76)
                 gridColor = Color.rgb(50, 59, 76)
             }
@@ -100,7 +107,7 @@ class MainActivity : AppCompatActivity() {
             }
             // 오른쪽 y축 설정
             mainChartView.axisRight.apply {
-                setLabelCount(7, false)
+                //setLabelCount(7, false)
                 textColor = Color.WHITE
                 // 가로선 표시 여부 설정
                 setDrawGridLines(true)
@@ -116,11 +123,13 @@ class MainActivity : AppCompatActivity() {
                 }
                 override fun onSwipeRight() {
                     if(loadFlag){
-                        Toast.makeText(this@MainActivity,"왼쪽으로",Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MainActivity,"데이터를 불러오는 중..",Toast.LENGTH_SHORT).show()
                         lifecycleScope.launch {
+                            mainSpinKit.visibility=View.VISIBLE
+                            delay(1500)
                             loadFlag=false
                             mainVm.getChartData("US2YT", preDate, curDate)
-                            mainSpinKit.visibility=View.VISIBLE
+
                         }
                     }
                 }
@@ -136,6 +145,13 @@ class MainActivity : AppCompatActivity() {
     fun setChartData(candles: ArrayList<Candle>) {
 
         var priceEntries = ArrayList<CandleEntry>()
+        //priceEntries.clear()
+        if(!saveChartList.isEmpty()){
+            for(candle in saveChartList){
+                candle.x+=7
+                Log.d("TAG", "candle.x : ${candle.x}")
+            }
+        }
         var i=0
         for (candle in candles) {
             // 캔들 차트 entry 생성
@@ -151,13 +167,13 @@ class MainActivity : AppCompatActivity() {
             i+=1
             //Log.d("TAG", "setChartData: $i 번쨰 캔들")
         }
-        curDate=candles[0].date
+        curDate= getBefor1Day(candles[0].date)
         preDate= getBefor3MDate(curDate)
         Log.d("TAG", "setChartData after curDate: $curDate ")
-
-        priceEntries= (priceEntries+saveChartList) as ArrayList<CandleEntry>
+        priceEntries.addAll(saveChartList)
+        //priceEntries= (priceEntries+saveChartList) as ArrayList<CandleEntry>
         saveChartList=priceEntries
-        Log.d("TAG", "setChartData: $priceEntries")
+        Log.d("TAG", "size ${priceEntries.size} ,setChartData: ${priceEntries[0]} ")
         val priceDataSet = CandleDataSet(priceEntries, "").apply {
             axisDependency = YAxis.AxisDependency.LEFT
             // 심지 부분 설정
@@ -178,6 +194,9 @@ class MainActivity : AppCompatActivity() {
 
         binding.mainChartView.apply {
             this.data = CandleData(priceDataSet)
+            Log.d("TAG", "priceDataSet: $priceDataSet")
+            this.data.notifyDataChanged()
+            notifyDataSetChanged()
             invalidate()
         }
     }
