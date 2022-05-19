@@ -85,17 +85,19 @@ class MainActivity : AppCompatActivity() {
     fun initChart() {
         binding.apply {
             mainChartView.description.isEnabled = false
-            mainChartView.setVisibleXRangeMaximum(10f)
-           /* mainChartView.xAxis.setLabelCount(7, /*force: */true)
-            mainChartView.xAxis.axisMinimum = 0F
-            mainChartView.xAxis.axisMaximum = 100F*/
+            mainChartView.setVisibleXRangeMaximum(20f)
+            mainChartView.isScrollContainer=true
+            mainChartView.setTouchEnabled(true)
             mainChartView.setPinchZoom(true)
             mainChartView.setDrawGridBackground(false)
+            mainChartView.isDragXEnabled=true
             // x축 설정
             mainChartView.xAxis.apply {
                 textColor = Color.TRANSPARENT
                 position = XAxis.XAxisPosition.BOTTOM
                 // 세로선 표시 여부 설정
+                //axisMaximum=15f
+
                 this.setDrawGridLines(false)
                 axisLineColor = Color.rgb(50, 59, 76)
                 gridColor = Color.rgb(50, 59, 76)
@@ -107,7 +109,6 @@ class MainActivity : AppCompatActivity() {
             }
             // 오른쪽 y축 설정
             mainChartView.axisRight.apply {
-                //setLabelCount(7, false)
                 textColor = Color.WHITE
                 // 가로선 표시 여부 설정
                 setDrawGridLines(true)
@@ -119,7 +120,7 @@ class MainActivity : AppCompatActivity() {
             mainChartView.legend.isEnabled = false
             mainChartView.setOnTouchListener(object :OnSwipeTouchListener(this@MainActivity){
                 override fun onSwipeLeft() {
-                    //Toast.makeText(this@MainActivity,"왼쪽으로",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity,"왼쪽으로",Toast.LENGTH_SHORT).show()
                 }
                 override fun onSwipeRight() {
                     if(loadFlag){
@@ -143,15 +144,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     fun setChartData(candles: ArrayList<Candle>) {
-
         var priceEntries = ArrayList<CandleEntry>()
-        //priceEntries.clear()
-        if(!saveChartList.isEmpty()){
-            for(candle in saveChartList){
-                candle.x+=7
-                Log.d("TAG", "candle.x : ${candle.x}")
-            }
-        }
         var i=0
         for (candle in candles) {
             // 캔들 차트 entry 생성
@@ -167,13 +160,19 @@ class MainActivity : AppCompatActivity() {
             i+=1
             //Log.d("TAG", "setChartData: $i 번쨰 캔들")
         }
+        //새로 추가한 데이터 개수만큼 기존의 데이터리스트에 x축요소에 더해주어 겹치지않게함
+        if(!saveChartList.isEmpty()){
+            for(candle in saveChartList){
+                candle.x+=i
+                Log.d("TAG", "candle.x : ${candle.x}")
+            }
+        }
         curDate= getBefor1Day(candles[0].date)
         preDate= getBefor3MDate(curDate)
-        Log.d("TAG", "setChartData after curDate: $curDate ")
+        //Log.d("TAG", "setChartData after curDate: $curDate ")
         priceEntries.addAll(saveChartList)
-        //priceEntries= (priceEntries+saveChartList) as ArrayList<CandleEntry>
         saveChartList=priceEntries
-        Log.d("TAG", "size ${priceEntries.size} ,setChartData: ${priceEntries[0]} ")
+        Log.d("TAG", "saveChartList size ${ saveChartList.size}")
         val priceDataSet = CandleDataSet(priceEntries, "").apply {
             axisDependency = YAxis.AxisDependency.LEFT
             // 심지 부분 설정
@@ -195,8 +194,9 @@ class MainActivity : AppCompatActivity() {
         binding.mainChartView.apply {
             this.data = CandleData(priceDataSet)
             Log.d("TAG", "priceDataSet: $priceDataSet")
-            this.data.notifyDataChanged()
+            /*this.data.notifyDataChanged()
             notifyDataSetChanged()
+            */
             invalidate()
         }
     }

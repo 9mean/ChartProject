@@ -80,7 +80,7 @@ object RetrofitClient {
         client.connectTimeout(100, TimeUnit.SECONDS)
         client.readTimeout(100, TimeUnit.SECONDS)
         client.writeTimeout(100, TimeUnit.SECONDS)
-        client.retryOnConnectionFailure(false)
+        client.retryOnConnectionFailure(true)
 
         if(retrofitClient==null){
             //레트로핏 빌더(생성패턴)를통해 인스턴스생성

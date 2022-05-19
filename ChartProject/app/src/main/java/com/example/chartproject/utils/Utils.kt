@@ -48,7 +48,7 @@ fun getBefor3MDate(curDate:String):String{
     val format = "yyyy-MM-dd"
     val sdf = SimpleDateFormat(format)
     Log.d("TAG", "getBefor3MDate 1 : ${cal.get(Calendar.MONTH)}")
-    cal.add(Calendar.DATE,-8) //세달 전 ( Calendar.MONTH -1당 7일로 계산됨)
+    cal.add(Calendar.DATE,-20) //세달 전 ( Calendar.MONTH -1당 7일로 계산됨)
     val date = sdf.format(cal.time)
     Log.d("TAG", "getBefor3MDate 2 : $date")
     return date
