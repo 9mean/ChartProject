@@ -19,7 +19,7 @@
             android:layout_margin="30dp"
             android:background="@drawable/custom_btn"
             android:padding="15dp"
-            android:text="차트 예측하기"
+            android:text="포지션 추천받기"
             android:textColor="@color/black"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -57,11 +57,11 @@
         android:layout_gravity="center"
         app:SpinKit_Color="@color/white" />
 
-        <com.github.mikephil.charting.charts.CandleStickChart
+        <com.github.mikephil.charting.charts.CombinedChart
             android:layout_below="@id/main_top_divider"
             android:id="@+id/main_chart_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-        </com.github.mikephil.charting.charts.CandleStickChart>
+        </com.github.mikephil.charting.charts.CombinedChart>
 
 </RelativeLayout>
