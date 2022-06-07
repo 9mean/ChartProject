@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var preDate:String
     var count=0
     var loadFlag:Boolean=false
+    var moveAvgFlag:Boolean=true
     var saveChartList=ArrayList<CandleEntry>()
     private val mainVm: MainVm by lazy {
         ViewModelProvider(this,MainVm.Factory(application)).get(MainVm::class.java)
@@ -54,13 +55,36 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+        binding.mainSettingBtn.setOnClickListener {
 
+            if(moveAvgFlag){
+                Log.d("TAG", "이평선 안보이게 하기")
+                moveAvgFlag=false
+                //hideMoveAvg()
+            }
+            else{
+
+                Log.d("TAG", "이평선 보이게 하기")
+                moveAvgFlag=true
+                //showMoveAvg()
+            }
+        }
     }
+
+    private fun showMoveAvg() {
+        binding.mainChartView.legend.isEnabled=true
+    }
+
+    private fun hideMoveAvg() {
+        binding.mainChartView.legend.isEnabled=false
+    }
+
     private fun loadAfterSetView(){
     Log.d("TAG", "loadAfterSetView: ")
         binding.mainTopDivider.visibility= View.VISIBLE
         binding.mainPredictBtn.visibility=View.VISIBLE
         binding.mainSettingBtn.visibility=View.VISIBLE
+        binding.mainBackBtn.visibility=View.VISIBLE
         binding.mainPredictBtn.setOnClickListener {
             val intent = Intent(this, PredictActivity::class.java)
             startActivity(intent)
@@ -116,21 +140,24 @@ class MainActivity : AppCompatActivity() {
 
             mainChartView.legend.isEnabled = true
             setChartLegend(0)
+            mainBackBtn.setOnClickListener {
+                if(loadFlag){
+                    Toast.makeText(this@MainActivity,"데이터를 불러오는 중..",Toast.LENGTH_SHORT).show()
+                    lifecycleScope.launch {
+                        mainSpinKit.visibility=View.VISIBLE
+                        delay(1500)
+                        loadFlag=false
+                        mainVm.getChartData("US2YT", preDate, curDate)
+
+                    }
+                }
+            }
             mainChartView.setOnTouchListener(object :OnSwipeTouchListener(this@MainActivity){
                 override fun onSwipeLeft() {
-                    Toast.makeText(this@MainActivity,"왼쪽으로",Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this@MainActivity,"왼쪽으로",Toast.LENGTH_SHORT).show()
                 }
                 override fun onSwipeRight() {
-                    if(loadFlag){
-                        Toast.makeText(this@MainActivity,"데이터를 불러오는 중..",Toast.LENGTH_SHORT).show()
-                        lifecycleScope.launch {
-                            mainSpinKit.visibility=View.VISIBLE
-                            delay(1500)
-                            loadFlag=false
-                            mainVm.getChartData("US2YT", preDate, curDate)
 
-                        }
-                    }
                 }
                 override fun onSwipeTop() {
                     //Toast.makeText(this@MainActivity,"위로",Toast.LENGTH_SHORT).show()
@@ -422,6 +449,7 @@ class MainActivity : AppCompatActivity() {
             valueTextSize = 0f
             lineWidth = 1.0f
         }
+
         val averageN2DataSet = LineDataSet(averageN2Entries, "").apply {
             setDrawCircles(false)
             color = Color.rgb(11, 41, 175)
